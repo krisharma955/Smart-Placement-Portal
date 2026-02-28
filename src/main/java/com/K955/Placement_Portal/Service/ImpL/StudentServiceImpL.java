@@ -30,7 +30,7 @@ public class StudentServiceImpL implements StudentService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId.toString()));
 
         Boolean check = studentRepository.existsByUserId(userId);
-        if(check) throw new BadRequestException("Student already exists this userId");
+        if(check) throw new BadRequestException("Student with userId: " +userId+ " already exists.");
 
         Student student = studentMapper.toStudent(request);
         student.setUser(user);
