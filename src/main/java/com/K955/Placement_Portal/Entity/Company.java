@@ -30,12 +30,10 @@ public class Company {
 
     String website;
 
-    @Column(nullable = false)
     String industry;
 
     String description;
 
-    @Column(nullable = false)
     String location;
 
     @Builder.Default

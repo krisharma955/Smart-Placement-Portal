@@ -24,22 +24,16 @@ public class Student {
     @JoinColumn(name = "user_id")
     User user;
 
-    @Column(nullable = false)
     String phoneNumber;
 
-    @Column(nullable = false)
     String college;
 
-    @Column(nullable = false)
     String degree;
 
-    @Column(nullable = false)
     String branch;
 
-    @Column(nullable = false)
     Integer graduationYear;
 
-    @Column(nullable = false)
     Double cgpa;
 
     @Builder.Default
