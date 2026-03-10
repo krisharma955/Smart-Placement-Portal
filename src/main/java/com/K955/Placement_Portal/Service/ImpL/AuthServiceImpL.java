@@ -100,11 +100,10 @@ public class AuthServiceImpL implements AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResourceNotFoundException("User", request.email()));
 
-        refreshTokenRepository.deleteByUserId(user.getId());
-
         String accessToken = jwtUtil.generateAccessToken(user);
 
         refreshTokenRepository.deleteByUserId(user.getId()); //delete the prev refresh token to get a new one
+        refreshTokenRepository.flush();  // force delete SQL to execute
 
         String refreshToken = jwtUtil.generateRefreshToken(user);
         RefreshToken refreshToken1 = RefreshToken.builder()

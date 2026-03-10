@@ -1,10 +1,15 @@
 package com.K955.Placement_Portal.Security;
 
 import com.K955.Placement_Portal.Entity.User;
+import com.K955.Placement_Portal.Exceptions.ResourceNotFoundException;
+import com.K955.Placement_Portal.Repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -12,7 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
+
+    private final UserRepository userRepository;
 
     @Value("${jwt.secret-key}")
     private String jwtSecretKey;
@@ -22,7 +30,6 @@ public class JwtUtil {
 
     @Value("${jwt.refresh-token.expiration}")
     private Long refreshTokenExpiration;
-
 
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(jwtSecretKey.getBytes(StandardCharsets.UTF_8));
@@ -71,6 +78,21 @@ public class JwtUtil {
     public boolean isTokenValid(String token, User user) {
         String username = extractUsername(token);
         return (username.equals(user.getEmail())) && (!isTokenExpired(token));
+    }
+
+    public String getCurrentUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication.getName();
+    }
+
+    public User getCurrentUser() {
+        String email = getCurrentUserEmail();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", email));
+    }
+
+    public Long getCurrentUserId() {
+        return getCurrentUser().getId();
     }
 
 }

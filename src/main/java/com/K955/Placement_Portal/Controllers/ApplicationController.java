@@ -2,6 +2,7 @@ package com.K955.Placement_Portal.Controllers;
 
 import com.K955.Placement_Portal.DTOs.Application.ApplicationResponse;
 import com.K955.Placement_Portal.DTOs.Application.UpdateApplicationStatusRequest;
+import com.K955.Placement_Portal.Security.JwtUtil;
 import com.K955.Placement_Portal.Service.ApplicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +18,12 @@ import java.util.List;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping("/{studentId}/{jobId}")
-    public ResponseEntity<ApplicationResponse> createApplication(@PathVariable Long studentId,
-                                                                 @PathVariable Long jobId) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.createApplication(studentId, jobId));
+    @PostMapping("/{jobId}")
+    public ResponseEntity<ApplicationResponse> createApplication(@PathVariable Long jobId) {
+        Long userId = jwtUtil.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.createApplication(userId, jobId));
     }
 
     @GetMapping("/{applicationId}")
@@ -29,9 +31,10 @@ public class ApplicationController {
         return ResponseEntity.ok(applicationService.getApplicationById(applicationId));
     }
 
-    @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ApplicationResponse>> getApplicationsByStudent(@PathVariable Long studentId) {
-        return ResponseEntity.ok(applicationService.getApplicationsByStudent(studentId));
+    @GetMapping("/student")
+    public ResponseEntity<List<ApplicationResponse>> getApplicationsByStudent() {
+        Long userId = jwtUtil.getCurrentUserId();
+        return ResponseEntity.ok(applicationService.getApplicationsByStudent(userId));
     }
 
     @GetMapping("/job/{jobId}")

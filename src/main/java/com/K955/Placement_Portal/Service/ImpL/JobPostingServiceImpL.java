@@ -27,9 +27,9 @@ public class JobPostingServiceImpL implements JobPostingService {
     private final JobPostingMapper jobPostingMapper;
 
     @Override
-    public JobPostingResponse createJobPosting(Long companyId, JobPostingRequest request) {
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Company", companyId.toString()));
+    public JobPostingResponse createJobPosting(Long userId, JobPostingRequest request) {
+        Company company = companyRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company", userId.toString()));
 
         JobPosting jobPosting = jobPostingMapper.toJobPosting(request);
         jobPosting.setCompany(company);

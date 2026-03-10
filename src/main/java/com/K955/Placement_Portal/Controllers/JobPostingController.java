@@ -3,6 +3,7 @@ package com.K955.Placement_Portal.Controllers;
 import com.K955.Placement_Portal.DTOs.JobPosting.JobPostingRequest;
 import com.K955.Placement_Portal.DTOs.JobPosting.JobPostingResponse;
 import com.K955.Placement_Portal.DTOs.JobPosting.UpdateJobPostingRequest;
+import com.K955.Placement_Portal.Security.JwtUtil;
 import com.K955.Placement_Portal.Service.JobPostingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +19,12 @@ import java.util.List;
 public class JobPostingController {
 
     private final JobPostingService jobPostingService;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping("/{companyId}")
-    public ResponseEntity<JobPostingResponse> createJobPosting(@PathVariable Long companyId,
-                                                               @Valid @RequestBody JobPostingRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(jobPostingService.createJobPosting(companyId, request));
+    @PostMapping
+    public ResponseEntity<JobPostingResponse> createJobPosting(@Valid @RequestBody JobPostingRequest request) {
+        Long userId = jwtUtil.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(jobPostingService.createJobPosting(userId, request));
     }
 
     @GetMapping("/{jobId}")

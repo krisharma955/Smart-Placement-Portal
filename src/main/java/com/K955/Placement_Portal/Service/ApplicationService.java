@@ -7,11 +7,11 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 public interface ApplicationService {
-    ApplicationResponse createApplication(Long studentId, Long jobId);
+    ApplicationResponse createApplication(Long userId, Long jobId);
 
     ApplicationResponse getApplicationById(Long applicationId);
 
-    List<ApplicationResponse> getApplicationsByStudent(Long studentId);
+    List<ApplicationResponse> getApplicationsByStudent(Long userId);
 
     List<ApplicationResponse> getApplicationsByJob(Long jobId);
 

@@ -9,7 +9,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 public interface JobPostingService {
-    JobPostingResponse createJobPosting(Long companyId, @Valid JobPostingRequest request);
+    JobPostingResponse createJobPosting(Long userId, @Valid JobPostingRequest request);
 
     JobPostingResponse getJobPostingById(Long jobId);
 

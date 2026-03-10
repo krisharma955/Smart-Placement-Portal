@@ -30,14 +30,14 @@ public class ApplicationServiceImpL implements ApplicationService {
     private final ApplicationMapper applicationMapper;
 
     @Override
-    public ApplicationResponse createApplication(Long studentId, Long jobId) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Student", studentId.toString()));
+    public ApplicationResponse createApplication(Long userId, Long jobId) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", userId.toString()));
 
         JobPosting jobPosting = jobPostingRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("JobPosting", jobId.toString()));
 
-        Boolean check = applicationRepository.existsByStudentIdAndJobPostingId(studentId, jobId);
+        Boolean check = applicationRepository.existsByStudentIdAndJobPostingId(student.getId(), jobId);
         if(check) throw new BadRequestException("Student has already applied to this job");
 
         if(jobPosting.getJobPostingStatus().equals(JobPostingStatus.CLOSE)) {
@@ -62,8 +62,10 @@ public class ApplicationServiceImpL implements ApplicationService {
     }
 
     @Override
-    public List<ApplicationResponse> getApplicationsByStudent(Long studentId) {
-        List<Application> applicationList = applicationRepository.findByStudentId(studentId);
+    public List<ApplicationResponse> getApplicationsByStudent(Long userId) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", userId.toString()));
+        List<Application> applicationList = applicationRepository.findByStudentId(student.getId());
         return applicationMapper.toListOfApplicationResponse(applicationList);
     }
 
