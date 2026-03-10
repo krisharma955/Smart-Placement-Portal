@@ -1,0 +1,88 @@
+package com.K955.Placement_Portal.Service.ImpL;
+
+import com.K955.Placement_Portal.DTOs.Resume.AtsReportResponse;
+import com.K955.Placement_Portal.Entity.AtsReport;
+import com.K955.Placement_Portal.Entity.Resume;
+import com.K955.Placement_Portal.Entity.Student;
+import com.K955.Placement_Portal.Exceptions.ResourceNotFoundException;
+import com.K955.Placement_Portal.Mapper.AtsReportMapper;
+import com.K955.Placement_Portal.Repository.AtsReportRepository;
+import com.K955.Placement_Portal.Repository.ResumeRepository;
+import com.K955.Placement_Portal.Repository.StudentRepository;
+import com.K955.Placement_Portal.Service.AtsService;
+import com.K955.Placement_Portal.Util.PdfTextExtractor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class AtsServiceImpL implements AtsService {
+
+    private final ResumeRepository resumeRepository;
+    private final AtsReportRepository atsReportRepository;
+    private final StudentRepository studentRepository;
+    private final PdfTextExtractor pdfTextExtractor;
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper;
+    private final AtsReportMapper atsReportMapper;
+
+    @Override
+    public AtsReportResponse analyzeResume(Long userId) throws IOException {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", userId.toString()));
+
+        Resume resume = resumeRepository.findByStudentUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume", student.getId().toString()));
+
+        String resumeText = pdfTextExtractor.extractText(resume.getFilePath());
+
+        String response = chatClient.prompt()
+                .user(resumeText)
+                .call()
+                .content();
+
+        AtsReportResponse parsed = objectMapper.readValue(response, AtsReportResponse.class);
+
+        AtsReport atsReport = AtsReport.builder()
+                .resume(resume)
+                .overallScore(parsed.overallScore())
+                .skillScore(parsed.skillScore())
+                .experienceScore(parsed.experienceScore())
+                .educationScore(parsed.educationScore())
+                .formattingScore(parsed.formattingScore())
+                .missingKeywords(parsed.missingKeywords())
+                .suggestions(parsed.suggestions())
+                .strengths(parsed.strengths())
+                .build();
+
+        AtsReport saved = atsReportRepository.save(atsReport);
+
+        return atsReportMapper.toAtsReportResponse(saved);
+    }
+
+    @Override
+    public List<AtsReportResponse> getAtsHistory(Long userId) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student", userId.toString()));
+
+        Resume resume = resumeRepository.findByStudentUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Resume", student.getId().toString()));
+
+        List<AtsReport> atsReportList = atsReportRepository.findByResumeId(resume.getId());
+
+        return atsReportMapper.toListOfAtsReportResponse(atsReportList);
+    }
+
+    @Override
+    public AtsReportResponse getAtsReport(Long reportId) {
+        AtsReport atsReport = atsReportRepository.findById(reportId)
+                .orElseThrow(() -> new ResourceNotFoundException("ATS Report", reportId.toString()));
+
+        return atsReportMapper.toAtsReportResponse(atsReport);
+    }
+}

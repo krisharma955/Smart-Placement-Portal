@@ -7,7 +7,6 @@ public record ResumeResponse(
         String fileName,
         String fileType,
         Long fileSize,
-        Instant uploadedAt,
-        Integer version
+        Instant uploadedAt
 ) {
 }
