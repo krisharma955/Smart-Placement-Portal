@@ -80,7 +80,7 @@ public class WebSecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",    // Next.js dev
-                "https://your-frontend-domain.vercel.app"  // production
+                "https://smart-placement-portal-frontend.vercel.app/"  // production
         ));
         configuration.setAllowedMethods(List.of(
                 "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
