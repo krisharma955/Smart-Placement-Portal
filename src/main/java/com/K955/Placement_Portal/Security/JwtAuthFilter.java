@@ -3,6 +3,7 @@ package com.K955.Placement_Portal.Security;
 import com.K955.Placement_Portal.Entity.User;
 import com.K955.Placement_Portal.Exceptions.ResourceNotFoundException;
 import com.K955.Placement_Portal.Repository.UserRepository;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -42,7 +41,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = requestHeaderToken.substring(7);
 
-        String email = jwtUtil.extractUsername(token);
+        String email;
+        try {
+            email = jwtUtil.extractUsername(token);
+        } catch (JwtException e) {
+            log.warn("Invalid JWT token: {}", e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         if(email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);

@@ -48,7 +48,7 @@ public class WebSecurityConfig {
                                 "/api-docs",
                                 "/webjars/**"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/jobs", "/api/jobs/**").permitAll()
                         .anyRequest().authenticated()
                 )
